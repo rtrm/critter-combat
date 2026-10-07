@@ -27,7 +27,7 @@ Capture-then-learn extends the existing Teach/Summon pattern: a successful captu
 
 ## Battleable critters
 
-Not every critter can fight - roughly 10% are flagged battleable at the data level (a property of the creature template, decided once when a critter is authored, not rolled live). A battleable critter shows an overhead indicator, the same anchor mechanism vanilla already uses for skinnable/lootable creatures, but rendered as two existing low-level sword weapon models crossed in an X over the creature's head - a real 3D model pair, not a 2D icon, and not the MoP paw. Any battleable critter is also capturable - there is no separate capturable flag.
+Not every critter can fight - roughly 10% are flagged battleable at the data level (a property of the creature template, decided once when a critter is authored, not rolled live). A battleable critter shows an overhead indicator, the same anchor mechanism vanilla already uses for skinnable/lootable creatures, but rendered as a crossed X of two real weapon models rather than a 2D icon or the MoP paw - picked for being the plainest, smallest basic shortsword model in the data, with no ornate variant to look out of place on a low-level critter: `Item\ObjectComponents\Weapon\Sword_1H_Short_A_01.m2`. Any battleable critter is also capturable - there is no separate capturable flag.
 
 ## The two taught spells
 
@@ -42,18 +42,21 @@ No camera change, unlike MoP - the two pets simply position themselves facing ea
 
 ## Pet health & death
 
-A pet's HP is persistent, character-bound state - it is not reset to full between battles or on summon. A pet that ends a fight at 10 HP is still at 10 HP the next time it comes out, carrying the consequence of a bad fight forward rather than resetting it for free. A pet that reaches 0 HP dies: it cannot be summoned at all until healed. Two ways to heal a pet:
+A pet's HP is persistent, character-bound state - it is not reset to full between battles or on summon. A pet that ends a fight at 10 HP is still at 10 HP the next time it comes out, carrying the consequence of a bad fight forward rather than resetting it for free. A pet that reaches 0 HP dies: it cannot be summoned at all until healed. Losing a battle *is* this - there is no separate loss penalty, a loss is simply the fight that ended in the pet's HP hitting 0. Two ways to heal a pet:
 
-- **The stable master**, for a fee (same NPC the two taught spells come from).
-- **A Pet Bandage item**, usable by the character directly, crafted via the First Aid profession. Tiered the same way regular bandages are (Linen, Wool, Silk, Mageweave, Runecloth, ...), but skipping the "Heavy" variant at each tier - one bandage per cloth rank, not two.
+- **The stable master**, for a fee: resurrecting every dead pet at once costs `1 silver × that pet's level`, summed across however many are dead.
+- **A Pet Bandage item**, usable by the character directly, crafted via the First Aid profession. Tiered the same way regular bandages are (Linen, Wool, Silk, Mageweave, Runecloth, ...), but skipping the "Heavy" variant at each tier - one bandage per cloth rank, not two. Each tier's recipe cost will land around the same as its equivalent normal-bandage recipe; exact values are a later pass.
+
+## Abilities don't change with level
+
+A pet's three abilities are fixed from the moment it's learned (level 1) for its whole life - there is no separate ability unlock as it levels, the way a class gains new spells. Only the *values* an ability already has (damage, healing, duration, ...) scale with the pet's current level; the kit itself never grows or changes.
 
 ## Still open (deliberately deferred)
 
-- What happens to the player's pet specifically on a *loss* (does it just end the fight at low/zero HP and die normally, or is there a separate loss penalty beyond the health system above) - not yet distinguished from an ordinary damaging fight.
-- The specific vanilla sword model to reuse for the overhead X indicator, and the specific icon/asset choices for the ability action bar.
+- The specific icon/asset choices for the ability action bar (depends on the abilities themselves, which are a later pass).
 - Ability content itself: the general families of effects (damage, heal, buff/debuff, ...) will take inspiration from MoP's own, and each critter species (Hare, Adder, ...) gets its own unique three - but authoring the actual list is a deliberately separate, later pass, not part of this design.
-- The stable master's exact gold costs (learning each spell, resurrecting a dead pet) and the Pet Bandage recipes' exact tier costs/materials.
-- Whether battling ever extends beyond wild critters (PvP pet battles) - nothing here assumes it will.
+- The stable master's exact gold cost for learning each spell, and the Pet Bandage recipes' exact tier costs/materials (principle set above, numbers later).
+- PvP pet battles - confirmed as a later milestone, not out of scope permanently, just not part of this one.
 
 ## Build order
 
