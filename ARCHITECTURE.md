@@ -1,6 +1,6 @@
-# Benilla Pet Battles — Architecture
+# Critter Combat — Architecture
 
-A client + server mod for vanilla World of Warcraft 1.12, adding a pet battle system on top of [benilla-pets-mounts-tab](https://github.com/rtrm/benilla-pets-mounts-tab)'s companion pet collection: capture a wild critter, fight with whatever pet is currently following you, and learn captured pets permanently, the same one-time-learn, character-bound pattern the companion collection already uses.
+A client + server mod for vanilla World of Warcraft 1.12, adding a critter combat system on top of [benilla-pets-mounts-tab](https://github.com/rtrm/benilla-pets-mounts-tab)'s companion pet collection: capture a wild critter, fight with whatever pet is currently following you, and learn captured pets permanently, the same one-time-learn, character-bound pattern the companion collection already uses. Named apart from "pet battles" since the design below departs from MoP's own system in several real ways, not just a vanilla reskin of it.
 
 ## Lineage, not a fresh fork
 
@@ -8,7 +8,7 @@ A client + server mod for vanilla World of Warcraft 1.12, adding a pet battle sy
 
 ## Clean-room policy
 
-Same as benilla-pets-mounts-tab's: this project does not read, clone, reference, or derive any code from the leaked Turtle WoW source some third parties mirror. Where a real game's publicly-documented pet-battle design (MoP's Pet Journal/battle system) inspired the concept, the implementation here is designed fresh from vanilla's own mechanics - and, per the design decisions below, deliberately diverges from that inspiration rather than reproducing it.
+Same as benilla-pets-mounts-tab's: this project does not read, clone, reference, or derive any code from the leaked Turtle WoW source some third parties mirror. Where a real game's publicly-documented pet-battle design (MoP's Pet Journal/battle system) inspired the concept, the implementation here is designed fresh from vanilla's own mechanics - and, per the design decisions below, deliberately diverges from that inspiration rather than reproducing it, which is also why this project is named Critter Combat and not Pet Battles.
 
 ## Scope-defining design decisions
 
@@ -58,6 +58,14 @@ A pet's three abilities are fixed from the moment it's learned (level 1) for its
 - The stable master's exact gold cost for learning each spell, and the Pet Bandage recipes' exact tier costs/materials (principle set above, numbers later).
 - PvP pet battles - confirmed as a later milestone, not out of scope permanently, just not part of this one.
 
-## Build order
+## Milestone 1: pilot the whole loop on one critter
 
-Not yet planned - this file will grow a "Milestone 1" section once the combat engine and capture mechanic are designed enough to build a pilot against, the same way benilla-pets-mounts-tab started from a single piloted companion before the bulk migration.
+The **Prairie Dog** is the pilot, the same role Black Tabby Cat played for the companion collection: prove the full pattern end to end on one critter before authoring the rest. Bulk-flagging the ~10% battleable population and authoring every other species' three abilities is explicitly a later, separate pass - this milestone is about the mechanics working at all, not content breadth.
+
+1. Flag the Prairie Dog battleable at the data level, and give it its three abilities for real (this is where ability-content work actually starts, even though full authoring across every species is deferred) - enough to drive a real fight, not placeholders.
+2. Add the client-side overhead indicator: the crossed `Sword_1H_Short_A_01.m2` pair over a battleable critter's head.
+3. Add the stable master's new, separate "Learn Critter Combat" gossip option, teaching Engage Critter Combat and Capture for gold, from character level 1.
+4. Build the battle flow: casting Engage Critter Combat on a targeted battleable critter positions the two pets, raises the pet-style action bar carrying the active pet's three abilities, and runs turn-based combat (higher level first, current-HP tiebreak).
+5. Wire up Capture: usable mid-battle, chance keyed off the enemy pet's level relative to yours; a success teaches the Prairie Dog permanently, extending the existing Teach/Summon pattern (its own ability kit and Summon-equivalent land in `character_spell`, the same as a companion pet today).
+6. Add persistent pet HP: carried across summons and battles, a pet at 0 HP becomes unsummonable, and both heal paths work - the stable master's `1 silver × level` resurrect-all, and a Pet Bandage item from First Aid.
+7. Verify live: learn both spells, find a wild Prairie Dog, see the sword-X indicator, fight it with a companion pet, lose on purpose (confirm death + unsummonable), resurrect at the stable master, fight and win, capture it, confirm it's now a permanently known pet with its own three abilities.

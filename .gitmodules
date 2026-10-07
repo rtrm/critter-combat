@@ -1,8 +1,8 @@
 [submodule "client"]
 	path = client
-	url = https://github.com/rtrm/benilla-pet-battles-client.git
+	url = https://github.com/rtrm/benilla-critter-combat.git
 	branch = main
 [submodule "server"]
 	path = server
-	url = https://github.com/rtrm/core-pet-battles.git
+	url = https://github.com/rtrm/core-critter-combat.git
 	branch = main
