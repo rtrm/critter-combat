@@ -17,19 +17,34 @@ These four decisions were made explicitly, as departures from the original "MoP 
 1. **Vanilla-only assets, no MoP client.** Every battle UI, icon and effect uses assets already reachable from a real 1.12.1 client - no MoP-era data is bundled or required, matching benilla-pets-mounts-tab's own asset policy.
 2. **One active pet, not a team of three.** You battle with whatever companion pet is currently summoned and following you, not a bench of three you pick before a fight. This matches the companion collection's own one-pet-out-at-a-time model (`_SetMiniPet`) instead of introducing a separate team-management concept.
 3. **A fixed kit of three abilities per pet.** Every pet (companion or capturable wild critter) has its own unique set of exactly three abilities - not a shared/generic movepool, and not player-customizable. The abilities belong to the pet, the same way a companion's Summon spell already belongs to that specific companion.
-4. **Level 20 cap, scaled across the 1-60 zone range.** A pet's own level caps at 20 regardless of player level, but a pet's effective strength in a battle scales with where it is - a level-20 pet means something different in a level-5 zone than a level-55 one. The exact scaling curve is not yet designed (see "Open design questions" below).
+4. **Level 20 cap, scaled across the 1-60 zone range.** A pet's own level caps at 20 regardless of player level, but a pet's effective strength in a battle scales with where it is - a level-20 pet means something different in a level-5 zone than a level-55 one. The formula: `critter_level ≈ zone's average character level ÷ 3`, within a threshold band around that centre (exact band width still open, see below), hard-capped at 20. This is internally consistent with decision 4's own premise: a level-60 zone's average character level (high 50s) divides to right around 20, so the cap and the top of the curve meet exactly where they should. Two real calibration points:
+   - Durotar (character levels 1-10, average 5.5) → critter levels 1-3
+   - Desolace (character levels 30-40, average 35) → critter levels 10-13
 
 Capture-then-learn extends the existing Teach/Summon pattern: a successful capture is this system's "Teach" step, and the pet's three-ability kit plus its Summon-equivalent are what gets permanently learned, character-bound, exactly like a companion pet today.
 
-## Open design questions (not yet designed in detail)
+## Battleable critters
 
-Deliberately left open until the combat system itself is designed:
+Not every critter can fight - roughly 10% are flagged battleable at the data level (a property of the creature template, decided once when a critter is authored, not rolled live). A battleable critter shows an overhead icon, the same mechanism vanilla already uses for skinnable/lootable creatures (a nameplate-anchored icon, not a MoP-style floating paw) - crossed swords, or a sword and shield, using existing vanilla icon assets rather than new art. Any battleable critter is also capturable - there is no separate capturable flag.
 
-- The capture mechanic: what makes an attempt succeed or fail, and what the player does to attempt one.
-- The battle engine: turn order, how abilities resolve, win/loss conditions, what happens to the player's own pet on a loss.
-- The level-scaling curve from decision 4: how a capped-at-20 pet's effective combat stats move across zones leveled 1 through 60.
-- Which existing critters become capturable, and how their three-ability kits get authored (169 companion pets already exist from milestone 1 - wild non-companion critters are a separate, much larger set).
-- Whether battling is PvE-only (wild pets) or extends to other players' active pets later.
+## The two taught spells
+
+Both are real, permanently-learned player spells (spellbook-visible, like any other), taught by a stable master through a **new, separate gossip option** ("Learn Critter Combat") alongside the existing stable/pet-management interface - not merged into it, and usable from character level 1 for a modest gold cost:
+
+- **Engage Critter Combat** (name placeholder) - cast on a targeted battleable critter to start a battle, pitting your currently-summoned pet against it.
+- **Capture** (name placeholder) - costs more to learn than Engage. Usable mid-battle; capture chance depends on the enemy pet's level relative to yours, the same shape as MoP's own formula (harder the further above your pet's level the target is).
+
+## Battle flow
+
+No camera change, unlike MoP - the two pets simply position themselves facing each other in the world, and a battle action bar appears, the same UI pattern as a hunter's or warlock's existing pet action bar, just carrying the active pet's three abilities instead of pet commands. Combat is turn-based.
+
+## Still open (deliberately deferred)
+
+- The battle engine's exact turn order and resolution (speed-based? always player-first? simultaneous?), and what happens to the player's pet on a loss.
+- The exact width of the level threshold band around the `zone average ÷ 3` centre.
+- The specific vanilla icon assets for the overhead battle-indicator and the ability action bar.
+- Ability content itself: the general families of effects (damage, heal, buff/debuff, ...) will take inspiration from MoP's own, and each critter species (Hare, Adder, ...) gets its own unique three - but authoring the actual list is a deliberately separate, later pass, not part of this design.
+- Whether battling ever extends beyond wild critters (PvP pet battles) - nothing here assumes it will.
 
 ## Build order
 
