@@ -17,15 +17,17 @@ These four decisions were made explicitly, as departures from the original "MoP 
 1. **Vanilla-only assets, no MoP client.** Every battle UI, icon and effect uses assets already reachable from a real 1.12.1 client - no MoP-era data is bundled or required, matching benilla-pets-mounts-tab's own asset policy.
 2. **One active pet, not a team of three.** You battle with whatever companion pet is currently summoned and following you, not a bench of three you pick before a fight. This matches the companion collection's own one-pet-out-at-a-time model (`_SetMiniPet`) instead of introducing a separate team-management concept.
 3. **A fixed kit of three abilities per pet.** Every pet (companion or capturable wild critter) has its own unique set of exactly three abilities - not a shared/generic movepool, and not player-customizable. The abilities belong to the pet, the same way a companion's Summon spell already belongs to that specific companion.
-4. **Level 20 cap, scaled across the 1-60 zone range.** A pet's own level caps at 20 regardless of player level, but a pet's effective strength in a battle scales with where it is - a level-20 pet means something different in a level-5 zone than a level-55 one. The formula: `critter_level ≈ zone's average character level ÷ 3`, within a threshold band around that centre (exact band width still open, see below), hard-capped at 20. This is internally consistent with decision 4's own premise: a level-60 zone's average character level (high 50s) divides to right around 20, so the cap and the top of the curve meet exactly where they should. Two real calibration points:
-   - Durotar (character levels 1-10, average 5.5) → critter levels 1-3
-   - Desolace (character levels 30-40, average 35) → critter levels 10-13
+4. **Level 20 cap, scaled across the 1-60 zone range.** A pet's own level caps at 20 regardless of player level, but a pet's effective strength in a battle scales with where it is - a level-20 pet means something different in a level-5 zone than a level-55 one. The formula takes a zone's own character level range (as Wowhead Classic's zone pages state it, e.g. Desolace's "Level: 30 - 39") and divides each end by 3, rounded to a whole number, independently - not an average-plus-spread: `critter_min = max(1, round(zone_char_min ÷ 3))`, `critter_max = round(zone_char_max ÷ 3)`. Two real calibration points:
+   - Durotar (character levels 1-10) → 1÷3 and 10÷3, rounded → critter levels 1-3
+   - Desolace (character levels 30-39) → 30÷3 and 39÷3 → critter levels 10-13
+
+   This is internally consistent with decision 4's own premise: a level-60 zone's character range divides to right around 20, so the cap and the top of the curve meet exactly where they should.
 
 Capture-then-learn extends the existing Teach/Summon pattern: a successful capture is this system's "Teach" step, and the pet's three-ability kit plus its Summon-equivalent are what gets permanently learned, character-bound, exactly like a companion pet today.
 
 ## Battleable critters
 
-Not every critter can fight - roughly 10% are flagged battleable at the data level (a property of the creature template, decided once when a critter is authored, not rolled live). A battleable critter shows an overhead icon, the same mechanism vanilla already uses for skinnable/lootable creatures (a nameplate-anchored icon, not a MoP-style floating paw) - crossed swords, or a sword and shield, using existing vanilla icon assets rather than new art. Any battleable critter is also capturable - there is no separate capturable flag.
+Not every critter can fight - roughly 10% are flagged battleable at the data level (a property of the creature template, decided once when a critter is authored, not rolled live). A battleable critter shows an overhead indicator, the same anchor mechanism vanilla already uses for skinnable/lootable creatures, but rendered as two existing low-level sword weapon models crossed in an X over the creature's head - a real 3D model pair, not a 2D icon, and not the MoP paw. Any battleable critter is also capturable - there is no separate capturable flag.
 
 ## The two taught spells
 
@@ -36,14 +38,21 @@ Both are real, permanently-learned player spells (spellbook-visible, like any ot
 
 ## Battle flow
 
-No camera change, unlike MoP - the two pets simply position themselves facing each other in the world, and a battle action bar appears, the same UI pattern as a hunter's or warlock's existing pet action bar, just carrying the active pet's three abilities instead of pet commands. Combat is turn-based.
+No camera change, unlike MoP - the two pets simply position themselves facing each other in the world, and a battle action bar appears, the same UI pattern as a hunter's or warlock's existing pet action bar, just carrying the active pet's three abilities instead of pet commands. Combat is turn-based: the higher-level pet acts first each round; a tie on level is broken by current HP (not max HP) - not speed or any other stat.
+
+## Pet health & death
+
+A pet's HP is persistent, character-bound state - it is not reset to full between battles or on summon. A pet that ends a fight at 10 HP is still at 10 HP the next time it comes out, carrying the consequence of a bad fight forward rather than resetting it for free. A pet that reaches 0 HP dies: it cannot be summoned at all until healed. Two ways to heal a pet:
+
+- **The stable master**, for a fee (same NPC the two taught spells come from).
+- **A Pet Bandage item**, usable by the character directly, crafted via the First Aid profession. Tiered the same way regular bandages are (Linen, Wool, Silk, Mageweave, Runecloth, ...), but skipping the "Heavy" variant at each tier - one bandage per cloth rank, not two.
 
 ## Still open (deliberately deferred)
 
-- The battle engine's exact turn order and resolution (speed-based? always player-first? simultaneous?), and what happens to the player's pet on a loss.
-- The exact width of the level threshold band around the `zone average ÷ 3` centre.
-- The specific vanilla icon assets for the overhead battle-indicator and the ability action bar.
+- What happens to the player's pet specifically on a *loss* (does it just end the fight at low/zero HP and die normally, or is there a separate loss penalty beyond the health system above) - not yet distinguished from an ordinary damaging fight.
+- The specific vanilla sword model to reuse for the overhead X indicator, and the specific icon/asset choices for the ability action bar.
 - Ability content itself: the general families of effects (damage, heal, buff/debuff, ...) will take inspiration from MoP's own, and each critter species (Hare, Adder, ...) gets its own unique three - but authoring the actual list is a deliberately separate, later pass, not part of this design.
+- The stable master's exact gold costs (learning each spell, resurrecting a dead pet) and the Pet Bandage recipes' exact tier costs/materials.
 - Whether battling ever extends beyond wild critters (PvP pet battles) - nothing here assumes it will.
 
 ## Build order
